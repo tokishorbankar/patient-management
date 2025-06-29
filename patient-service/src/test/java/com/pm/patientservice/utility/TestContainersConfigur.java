@@ -10,11 +10,11 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 public class TestContainersConfigur {
 
-  private final static String POSTGRES_IMAGE = "postgres:17.0";
-  private final static String POSTGRES_DB = "patienttestdb";
-  private final static String POSTGRES_USER = "tester";
-  private final static String POSTGRES_PASSWORD = "tester";
-  private final static int POSTGRES_PORT = 5432;
+  private final String POSTGRES_IMAGE = "postgres:17.0";
+  private final String POSTGRES_DB = "patienttestdb";
+  private final String POSTGRES_USER = "tester";
+  private final String POSTGRES_PASSWORD = "tester";
+  private final int POSTGRES_PORT = 5432;
 
   @Bean
   @ServiceConnection
@@ -25,5 +25,6 @@ public class TestContainersConfigur {
         .withPassword(POSTGRES_PASSWORD)
         .withExposedPorts(POSTGRES_PORT);
   }
+
 
 }
