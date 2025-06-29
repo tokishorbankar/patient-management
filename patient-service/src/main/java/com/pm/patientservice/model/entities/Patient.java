@@ -14,7 +14,6 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
@@ -22,7 +21,6 @@ import lombok.Setter;
 @Builder
 @Setter
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
 
 public class Patient {
@@ -51,5 +49,8 @@ public class Patient {
   @PastOrPresent
   @Column(name = "registered_date")
   private LocalDate registeredDate;
+
+  public Patient() {
+  }
 
 }

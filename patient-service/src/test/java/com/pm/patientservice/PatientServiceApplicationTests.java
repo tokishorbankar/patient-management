@@ -1,6 +1,6 @@
 package com.pm.patientservice;
 
-import com.pm.patientservice.utility.TestContainersConfigur;
+import com.pm.patientservice.configuration.TestContainersConfiguration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,7 +9,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
 @Testcontainers
-@ContextConfiguration(classes = TestContainersConfigur.class)
+@ContextConfiguration(classes = TestContainersConfiguration.class)
 class PatientServiceApplicationTests {
 
   @Test

@@ -1,4 +1,4 @@
-package com.pm.patientservice.utility;
+package com.pm.patientservice.configuration;
 
 
 import org.springframework.boot.test.context.TestConfiguration;
@@ -8,7 +8,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
-public class TestContainersConfigur {
+public class TestContainersConfiguration {
 
   private final String POSTGRES_IMAGE = "postgres:17.0";
   private final String POSTGRES_DB = "patienttestdb";

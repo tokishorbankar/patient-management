@@ -99,6 +99,18 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(405).body(response);
   }
 
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<APIResponse<String>> handleIllegalArgumentException(
+      final IllegalArgumentException ex) {
+    log.warn("Illegal argument: {}", ex.getMessage());
+
+    APIResponse<String> response = new APIResponse<>(null,
+        "Invalid argument: " + ex.getMessage(),
+        APIResponse.DEFAULT_ERROR_STATUS);
+
+    return ResponseEntity.badRequest().body(response);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<APIResponse<String>> handleGenericException(final Exception ex) {
     log.error("An unexpected error occurred: {}", ex.getMessage(), ex);

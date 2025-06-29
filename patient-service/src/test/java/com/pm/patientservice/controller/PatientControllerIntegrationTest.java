@@ -1,25 +1,32 @@
 package com.pm.patientservice.controller;
 
-import com.pm.patientservice.utility.TestContainersConfigur;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.instancio.Select.field;
+
+import com.pm.patientservice.configuration.TestContainersConfiguration;
+import com.pm.patientservice.model.dto.PatientDTO;
 import io.restassured.RestAssured;
-import io.restassured.http.Method;
+import java.util.UUID;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ContextConfiguration(classes = TestContainersConfigur.class)
+@ContextConfiguration(classes = TestContainersConfiguration.class)
 @Testcontainers
 class PatientControllerIntegrationTest {
 
-  private String BASE_URL_PATIENTS = "http://localhost:%s/patients";
-
   @LocalServerPort
   int port;
+
+  private String BASE_URL_PATIENTS = "http://localhost:%s/patients";
 
   @BeforeEach
   void setUpBaseUrls() {
@@ -31,13 +38,13 @@ class PatientControllerIntegrationTest {
   void should_Returns_AllPatients() {
     RestAssured.given()
         .when()
-        .request(Method.GET, "")
+        .get("")
         .then()
-        .statusCode(200)
+        .statusCode(HttpStatus.OK.value())
         .body("size()", org.hamcrest.Matchers.greaterThan(0))
         .body("message",
-            org.hamcrest.Matchers.equalTo("Operation successful"))
-        .body("success", org.hamcrest.Matchers.equalTo(true));
+            equalTo("Operation successful"))
+        .body("success", equalTo(true));
   }
 
   @Test
@@ -45,11 +52,92 @@ class PatientControllerIntegrationTest {
   void should_ReturnPatientById() {
     RestAssured.given()
         .when()
-        .request(Method.GET, "/{id}", "123e4567-e89b-12d3-a456-426614174000")
+        .get("/{id}", "123e4567-e89b-12d3-a456-426614174000")
         .then()
-        .statusCode(200)
-        .body("data.id", org.hamcrest.Matchers.equalTo("123e4567-e89b-12d3-a456-426614174000"))
-        .body("message", org.hamcrest.Matchers.equalTo("Operation successful"))
-        .body("success", org.hamcrest.Matchers.equalTo(true));
+        .statusCode(HttpStatus.OK.value())
+        .body("data.id", equalTo("123e4567-e89b-12d3-a456-426614174000"))
+        .body("message", equalTo("Operation successful"))
+        .body("success", equalTo(true));
   }
+
+  @Test
+  @DisplayName("should return patient by email")
+  void should_ReturnPatientByEmail() {
+    String email = "john.doe@example.com";
+
+    RestAssured.given()
+        .when()
+        .get("/email/{email}", email)
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body("data.email", equalTo(email))
+        .body("message", equalTo("Operation successful"))
+        .body("success", equalTo(true));
+  }
+
+  @Test
+  @DisplayName("should create a new patient")
+  void should_CreateNewPatient() {
+    PatientDTO patientDTO = Instancio.of(PatientDTO.class)
+        .ignore(field(PatientDTO::getId))
+        .set(field(PatientDTO::getRegisteredDate), "2023-12-01")
+        .set(field(PatientDTO::getDateOfBirth), "2020-12-01")
+        .generate(field(PatientDTO::getEmail), gen -> gen.net().email())
+        .create();
+
+    RestAssured.given()
+        .contentType("application/json")
+        .body(patientDTO)
+        .when()
+        .post()
+        .then()
+        .statusCode(HttpStatus.CREATED.value())
+        .body("data.email", equalTo(patientDTO.getEmail()))
+        .body("message", equalTo("Operation successful"))
+        .body("success", equalTo(true));
+  }
+
+  @Test
+  @DisplayName("should update an existing patient")
+  void should_UpdateExistingPatient() {
+    PatientDTO savePatientDTO = Instancio.of(PatientDTO.class)
+        .ignore(field(PatientDTO::getId))
+        .set(field(PatientDTO::getRegisteredDate), "2023-12-01")
+        .set(field(PatientDTO::getDateOfBirth), "2020-12-01")
+        .generate(field(PatientDTO::getEmail), gen -> gen.net().email())
+        .create();
+
+    String idAsString =
+        RestAssured.given()
+            .contentType("application/json")
+            .body(savePatientDTO)
+            .when()
+            .post()
+            .then()
+            .statusCode(HttpStatus.CREATED.value())
+            .body("data.email", equalTo(savePatientDTO.getEmail()))
+            .body("message", equalTo("Operation successful"))
+            .body("success", equalTo(true))
+            .extract()
+            .path("data.id");
+
+    UUID alreadyExistingPatientId = UUID.fromString(idAsString);
+
+    String originalEmail = savePatientDTO.getEmail();
+    savePatientDTO.setEmail("tester@example.com");
+
+    RestAssured.given()
+        .contentType("application/json")
+        .body(savePatientDTO)
+        .when()
+        .put("/{id}", alreadyExistingPatientId)
+        .then()
+        .statusCode(HttpStatus.ACCEPTED.value())
+        .body("data.id", equalTo(alreadyExistingPatientId.toString()))
+        .body("data.email", not(equalTo(originalEmail)))
+        .body("data.email", equalTo(savePatientDTO.getEmail()))
+        .body("message", equalTo("Operation successful"))
+        .body("success", equalTo(true));
+  }
+
 }
