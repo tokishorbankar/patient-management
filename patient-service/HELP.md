@@ -13,3 +13,13 @@ docker-compose up -d &
 ```shell
 docker-compose down
 ```
+
+* Build the Docker image with the following command:
+```shell
+docker build -t patient-service:latest .
+```
+
+* Run the Docker container with the following command:
+```shell
+docker run --name patient-service -d -p 8080:8080 patient-service:latest
+```
