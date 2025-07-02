@@ -16,9 +16,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PatientService {
 
+  public static final String ERROR_MESSAGE_NOT_FOUND_BY_ID = "Patient not found with ID: %s";
+  public static final String ERROR_MESSAGE_NOT_FOUND_BY_EMAIL_ID = "Patient not found with email: "
+      + "%s";
+  public static final String ERROR_MESSAGE_ALREADY_EXISTS_BY_EMAIL_ID = "Patient already exists "
+      + "with "
+      + "the provided email address %s";
   private static final Logger log = LoggerFactory.getLogger(PatientService.class);
 
   private final PatientMapper patientMapper;
+
   private final PatientRepository patientRepository;
 
   /**
@@ -57,8 +64,8 @@ public class PatientService {
     log.info("Retrieving patient with ID: {}", id);
     return patientRepository.findById(id)
         .map(patientMapper::toDto)
-        .orElseThrow(() -> new PatientNotFoundException(String.format("Patient not found with ID: "
-            + "%s", id)));
+        .orElseThrow(
+            () -> new PatientNotFoundException(String.format(ERROR_MESSAGE_NOT_FOUND_BY_ID, id)));
   }
 
   /**
@@ -72,8 +79,8 @@ public class PatientService {
     log.info("Retrieving patient with email: {}", email);
     return patientRepository.findByEmail(email)
         .map(patientMapper::toDto)
-        .orElseThrow(() -> new PatientNotFoundException(String.format("Patient not found with "
-            + "email: %s", email)));
+        .orElseThrow(() -> new PatientNotFoundException(
+            String.format(ERROR_MESSAGE_NOT_FOUND_BY_EMAIL_ID, email)));
   }
 
   /**
@@ -88,8 +95,7 @@ public class PatientService {
 
     if (patientRepository.existsByEmail(patientDTO.getEmail())) {
       throw new EmailAlreadyExistsException(
-          String.format("Patient already exists with "
-              + "the provided email address %s", patientDTO.getEmail()));
+          String.format(ERROR_MESSAGE_ALREADY_EXISTS_BY_EMAIL_ID, patientDTO.getEmail()));
     }
 
     Patient saved = patientRepository.save(patientMapper.toEntity(patientDTO));
@@ -109,12 +115,12 @@ public class PatientService {
     log.info("Updating patient with ID: {}", id);
 
     if (!patientRepository.existsById(id)) {
-      throw new PatientNotFoundException(String.format("Patient not found with ID: %s", id));
+      throw new PatientNotFoundException(String.format(ERROR_MESSAGE_NOT_FOUND_BY_ID, id));
     }
 
     if (patientRepository.existsByEmailAndIdNot(patientDTO.getEmail(), id)) {
       throw new EmailAlreadyExistsException(
-          String.format("Patient already exists with the provided email address %s",
+          String.format(ERROR_MESSAGE_ALREADY_EXISTS_BY_EMAIL_ID,
               patientDTO.getEmail()));
     }
 
@@ -132,7 +138,7 @@ public class PatientService {
   public void deletePatient(final UUID id) {
     log.info("Deleting patient with ID: {}", id);
     if (!patientRepository.existsById(id)) {
-      throw new PatientNotFoundException(String.format("Patient not found with ID: %s", id));
+      throw new PatientNotFoundException(String.format(ERROR_MESSAGE_NOT_FOUND_BY_ID, id));
     }
     patientRepository.deleteById(id);
   }
@@ -146,8 +152,8 @@ public class PatientService {
   public void deletePatientByEmail(final String email) {
     log.info("Deleting patient with email: {}", email);
     Patient patient = patientRepository.findByEmail(email)
-        .orElseThrow(() -> new PatientNotFoundException(String.format("Patient not found with "
-            + "email: %s", email)));
+        .orElseThrow(() -> new PatientNotFoundException(
+            String.format(ERROR_MESSAGE_NOT_FOUND_BY_EMAIL_ID, email)));
     patientRepository.delete(patient);
   }
 
