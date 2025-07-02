@@ -1,22 +1,18 @@
 # USAGES
 
-## Start the database contain
-> First Run Docker Desktop or Docker Engine Refer to the [Docker documentation](https://docs.docker.com/get-started/)
-> Refer to the Docker Compose file in the docker folder.
- 
-* To start the database container, run the following command in your terminal:
+* To start the database container and patient-service, run the following command in your terminal:
 ```shell
-docker-compose up -d &
+docker-compose -f docker/docker-compose.yml up -d
 ```
 
-* To stop the database container, run the following command in your terminal:
+* To stop the database container and patient-service, run the following command in your terminal:
 ```shell
-docker-compose down
+docker-compose -f docker/docker-compose.yml down
 ```
 
 * Build the Docker image with the following command:
 ```shell
-docker build -t patient-service:latest .
+docker build -t patient-service:latest . --no-cache
 ```
 
 * Run the Docker container with the following command:
