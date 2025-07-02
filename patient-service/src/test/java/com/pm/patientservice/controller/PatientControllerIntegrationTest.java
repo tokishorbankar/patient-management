@@ -3,13 +3,17 @@ package com.pm.patientservice.controller;
 import static com.pm.patientservice.service.PatientService.ERROR_MESSAGE_NOT_FOUND_BY_EMAIL_ID;
 import static com.pm.patientservice.service.PatientService.ERROR_MESSAGE_NOT_FOUND_BY_ID;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.instancio.Select.field;
 
 import com.pm.patientservice.configuration.TestContainersConfiguration;
 import com.pm.patientservice.model.dto.PatientDTO;
 import io.restassured.RestAssured;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,39 +32,25 @@ class PatientControllerIntegrationTest {
   @LocalServerPort
   int port;
 
-  private String BASE_URL_PATIENTS = "http://localhost:%s/patients";
-
   @BeforeEach
   void setUpBaseUrls() {
-    RestAssured.baseURI = String.format(BASE_URL_PATIENTS, port);
+    String url = "http://localhost:%s/patients";
+    RestAssured.baseURI = String.format(url, port);
   }
 
-  @Test
-  @DisplayName("should return all patients")
-  void should_Returns_AllPatients() {
-    RestAssured
-        .given()
-        .when()
-        .get("")
-        .then()
-        .statusCode(HttpStatus.OK.value())
-        .body("size()", org.hamcrest.Matchers.greaterThan(0))
-        .body("message",
-            equalTo("Operation successful"))
-        .body("success", equalTo(true));
-  }
-
-  @Test
-  @DisplayName("should return patient by ID")
-  void should_ReturnPatientById() {
-    PatientDTO patientDTO = Instancio.of(PatientDTO.class)
+  // Helper method to create a PatientDTO with random data
+  private PatientDTO buildRandomPatientDTO() {
+    return Instancio.of(PatientDTO.class)
         .ignore(field(PatientDTO::getId))
         .set(field(PatientDTO::getRegisteredDate), "2023-12-01")
         .set(field(PatientDTO::getDateOfBirth), "2020-12-01")
         .generate(field(PatientDTO::getEmail), gen -> gen.net().email())
         .create();
+  }
 
-    String id = RestAssured
+  // Helper method to create and persist a patient, returning the id
+  private String createPatientAndGetId(PatientDTO patientDTO) {
+    return RestAssured
         .given()
         .contentType("application/json")
         .body(patientDTO)
@@ -73,7 +63,53 @@ class PatientControllerIntegrationTest {
         .body("success", equalTo(true))
         .extract()
         .path("data.id");
+  }
 
+  // Helper method to create and persist a patient, returning the email
+  private String createPatientAndGetEmail(PatientDTO patientDTO) {
+    return RestAssured
+        .given()
+        .contentType("application/json")
+        .body(patientDTO)
+        .when()
+        .post()
+        .then()
+        .statusCode(HttpStatus.CREATED.value())
+        .body("data.email", equalTo(patientDTO.getEmail()))
+        .body("message", equalTo("Operation successful"))
+        .body("success", equalTo(true))
+        .extract()
+        .path("data.email");
+  }
+
+  @Test
+  @DisplayName("should return all patients")
+  void should_Returns_AllPatients() {
+    // crate list of patientDTOSList using buildRandomPatientDTO method use java stream
+
+    List<PatientDTO> patientDTOList = Stream.generate(this::buildRandomPatientDTO)
+        .limit(5)
+        .toList();
+
+    List<String> ids = patientDTOList.stream().map(this::createPatientAndGetId).toList();
+
+    RestAssured
+        .given()
+        .when()
+        .get("")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body("size()", greaterThan(0))
+        .body("data.id", hasItems(ids.toArray()))
+        .body("message", equalTo("Operation successful"))
+        .body("success", equalTo(true));
+  }
+
+  @Test
+  @DisplayName("should return patient by ID")
+  void should_ReturnPatientById() {
+    PatientDTO patientDTO = buildRandomPatientDTO();
+    String id = createPatientAndGetId(patientDTO);
     RestAssured
         .given()
         .when()
@@ -88,27 +124,8 @@ class PatientControllerIntegrationTest {
   @Test
   @DisplayName("should return patient by email")
   void should_ReturnPatientByEmail() {
-    PatientDTO patientDTO = Instancio.of(PatientDTO.class)
-        .ignore(field(PatientDTO::getId))
-        .set(field(PatientDTO::getRegisteredDate), "2023-12-01")
-        .set(field(PatientDTO::getDateOfBirth), "2020-12-01")
-        .generate(field(PatientDTO::getEmail), gen -> gen.net().email())
-        .create();
-
-    String email = RestAssured
-        .given()
-        .contentType("application/json")
-        .body(patientDTO)
-        .when()
-        .post()
-        .then()
-        .statusCode(HttpStatus.CREATED.value())
-        .body("data.email", equalTo(patientDTO.getEmail()))
-        .body("message", equalTo("Operation successful"))
-        .body("success", equalTo(true))
-        .extract()
-        .path("data.email");
-
+    PatientDTO patientDTO = buildRandomPatientDTO();
+    String email = createPatientAndGetEmail(patientDTO);
     RestAssured
         .given()
         .when()
@@ -123,66 +140,32 @@ class PatientControllerIntegrationTest {
   @Test
   @DisplayName("should create a new patient")
   void should_CreateNewPatient() {
-    PatientDTO patientDTO = Instancio.of(PatientDTO.class)
-        .ignore(field(PatientDTO::getId))
-        .set(field(PatientDTO::getRegisteredDate), "2023-12-01")
-        .set(field(PatientDTO::getDateOfBirth), "2020-12-01")
-        .generate(field(PatientDTO::getEmail), gen -> gen.net().email())
-        .create();
+    PatientDTO patientDTO = buildRandomPatientDTO();
+    createPatientAndGetId(patientDTO); // assertion is in helper
+  }
+
+  @Test
+  @DisplayName("should update an existing patient")
+  void should_UpdateExistingPatient() {
+    PatientDTO patientDTO = buildRandomPatientDTO();
+    String id = createPatientAndGetId(patientDTO);
+
+    UUID patientId = UUID.fromString(id);
+
+    String originalEmail = patientDTO.getEmail();
+
+    String newEmail = Instancio.gen().net().email().toString();
+    patientDTO.setEmail(newEmail);
 
     RestAssured
         .given()
         .contentType("application/json")
         .body(patientDTO)
         .when()
-        .post()
-        .then()
-        .statusCode(HttpStatus.CREATED.value())
-        .body("data.email", equalTo(patientDTO.getEmail()))
-        .body("message", equalTo("Operation successful"))
-        .body("success", equalTo(true));
-  }
-
-  @Test
-  @DisplayName("should update an existing patient")
-  void should_UpdateExistingPatient() {
-    PatientDTO savePatientDTO = Instancio.of(PatientDTO.class)
-        .ignore(field(PatientDTO::getId))
-        .set(field(PatientDTO::getRegisteredDate), "2023-12-01")
-        .set(field(PatientDTO::getDateOfBirth), "2020-12-01")
-        .generate(field(PatientDTO::getEmail), gen -> gen.net().email())
-        .create();
-
-    String idAsString =
-        RestAssured
-            .given()
-            .contentType("application/json")
-            .body(savePatientDTO)
-            .when()
-            .post()
-            .then()
-            .statusCode(HttpStatus.CREATED.value())
-            .body("data.email", equalTo(savePatientDTO.getEmail()))
-            .body("message", equalTo("Operation successful"))
-            .body("success", equalTo(true))
-            .extract()
-            .path("data.id");
-
-    UUID alreadyExistingPatientId = UUID.fromString(idAsString);
-
-    String originalEmail = savePatientDTO.getEmail();
-    String newEmail = (String.valueOf(Instancio.gen().net().email()));
-    savePatientDTO.setEmail(newEmail);
-
-    RestAssured
-        .given()
-        .contentType("application/json")
-        .body(savePatientDTO)
-        .when()
-        .put("/{id}", alreadyExistingPatientId)
+        .put("/{id}", patientId)
         .then()
         .statusCode(HttpStatus.ACCEPTED.value())
-        .body("data.id", equalTo(alreadyExistingPatientId.toString()))
+        .body("data.id", equalTo(patientId.toString()))
         .body("data.email", not(equalTo(originalEmail)))
         .body("data.email", equalTo(newEmail))
         .body("message", equalTo("Operation successful"))
@@ -192,20 +175,11 @@ class PatientControllerIntegrationTest {
   @Test
   @DisplayName("should delete a patient by ID")
   void should_DeletePatientById() {
-    String idAsString =
-        RestAssured
-            .given()
-            .when()
-            .get("/{id}", "123e4567-e89b-12d3-a456-426614174000")
-            .then()
-            .statusCode(HttpStatus.OK.value())
-            .body("data.id", equalTo("123e4567-e89b-12d3-a456-426614174000"))
-            .body("message", equalTo("Operation successful"))
-            .body("success", equalTo(true))
-            .extract()
-            .path("data.id");
+    // For a real test, create a patient first, then delete
+    PatientDTO patientDTO = buildRandomPatientDTO();
+    String id = createPatientAndGetId(patientDTO);
 
-    UUID patientId = UUID.fromString(idAsString);
+    UUID patientId = UUID.fromString(id);
 
     RestAssured
         .given()
@@ -220,32 +194,13 @@ class PatientControllerIntegrationTest {
   @Test
   @DisplayName("should delete a patient by email")
   void should_DeletePatientByEmail() {
-    PatientDTO savePatientDTO = Instancio.of(PatientDTO.class)
-        .ignore(field(PatientDTO::getId))
-        .set(field(PatientDTO::getRegisteredDate), "2023-12-01")
-        .set(field(PatientDTO::getDateOfBirth), "2020-12-01")
-        .generate(field(PatientDTO::getEmail), gen -> gen.net().email())
-        .create();
-
-    String emailIddAsString =
-        RestAssured
-            .given()
-            .contentType("application/json")
-            .body(savePatientDTO)
-            .when()
-            .post()
-            .then()
-            .statusCode(HttpStatus.CREATED.value())
-            .body("data.email", equalTo(savePatientDTO.getEmail()))
-            .body("message", equalTo("Operation successful"))
-            .body("success", equalTo(true))
-            .extract()
-            .path("data.email");
+    PatientDTO patientDTO = buildRandomPatientDTO();
+    String email = createPatientAndGetEmail(patientDTO);
 
     RestAssured
         .given()
         .when()
-        .delete("/email/{email}", emailIddAsString)
+        .delete("/email/{email}", email)
         .then()
         .statusCode(HttpStatus.ACCEPTED.value())
         .body("message", equalTo("Operation successful"))
@@ -255,32 +210,13 @@ class PatientControllerIntegrationTest {
   @Test
   @DisplayName("should return 404 when patient not found by ID")
   void should_Return404WhenPatientNotFoundById() {
-    PatientDTO savePatientDTO = Instancio.of(PatientDTO.class)
-        .ignore(field(PatientDTO::getId))
-        .set(field(PatientDTO::getRegisteredDate), "2023-12-01")
-        .set(field(PatientDTO::getDateOfBirth), "2020-12-01")
-        .generate(field(PatientDTO::getEmail), gen -> gen.net().email())
-        .create();
-
-    String iddAsString =
-        RestAssured
-            .given()
-            .contentType("application/json")
-            .body(savePatientDTO)
-            .when()
-            .post()
-            .then()
-            .statusCode(HttpStatus.CREATED.value())
-            .body("data.email", equalTo(savePatientDTO.getEmail()))
-            .body("message", equalTo("Operation successful"))
-            .body("success", equalTo(true))
-            .extract()
-            .path("data.id");
+    PatientDTO patientDTO = buildRandomPatientDTO();
+    String id = createPatientAndGetId(patientDTO);
 
     RestAssured
         .given()
         .when()
-        .delete("/{id}", iddAsString)
+        .delete("/{id}", id)
         .then()
         .statusCode(HttpStatus.ACCEPTED.value())
         .body("message", equalTo("Operation successful"))
@@ -289,42 +225,23 @@ class PatientControllerIntegrationTest {
     RestAssured
         .given()
         .when()
-        .get("/{id}", iddAsString)
+        .get("/{id}", id)
         .then()
         .statusCode(HttpStatus.NOT_FOUND.value())
-        .body("message", equalTo(String.format(ERROR_MESSAGE_NOT_FOUND_BY_ID, iddAsString)))
+        .body("message", equalTo(String.format(ERROR_MESSAGE_NOT_FOUND_BY_ID, id)))
         .body("success", equalTo(false));
   }
 
   @Test
   @DisplayName("should return 404 when patient not found by email")
   void should_Return404WhenPatientNotFoundByEmail() {
-    PatientDTO savePatientDTO = Instancio.of(PatientDTO.class)
-        .ignore(field(PatientDTO::getId))
-        .set(field(PatientDTO::getRegisteredDate), "2023-12-01")
-        .set(field(PatientDTO::getDateOfBirth), "2020-12-01")
-        .generate(field(PatientDTO::getEmail), gen -> gen.net().email())
-        .create();
-
-    String emailIdAsString =
-        RestAssured
-            .given()
-            .contentType("application/json")
-            .body(savePatientDTO)
-            .when()
-            .post()
-            .then()
-            .statusCode(HttpStatus.CREATED.value())
-            .body("data.email", equalTo(savePatientDTO.getEmail()))
-            .body("message", equalTo("Operation successful"))
-            .body("success", equalTo(true))
-            .extract()
-            .path("data.email");
+    PatientDTO patientDTO = buildRandomPatientDTO();
+    String email = createPatientAndGetEmail(patientDTO);
 
     RestAssured
         .given()
         .when()
-        .delete("/email/{email}", emailIdAsString)
+        .delete("/email/{email}", email)
         .then()
         .statusCode(HttpStatus.ACCEPTED.value())
         .body("message", equalTo("Operation successful"))
@@ -333,13 +250,11 @@ class PatientControllerIntegrationTest {
     RestAssured
         .given()
         .when()
-        .get("/email/{email}", emailIdAsString)
+        .get("/email/{email}", email)
         .then()
         .statusCode(HttpStatus.NOT_FOUND.value())
-        .body("message",
-            equalTo(String.format(ERROR_MESSAGE_NOT_FOUND_BY_EMAIL_ID, emailIdAsString)))
+        .body("message", equalTo(String.format(ERROR_MESSAGE_NOT_FOUND_BY_EMAIL_ID, email)))
         .body("success", equalTo(false));
   }
-
 
 }
