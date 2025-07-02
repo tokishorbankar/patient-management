@@ -35,6 +35,8 @@
     <instancio.version>5.4.0</instancio.version>
     <mapstruct.version>1.5.3.Final</mapstruct.version>
     <mapstruct-bindings.version>0.2.0</mapstruct-bindings.version>
+    <jacoco-version>0.8.11</jacoco-version>
+    <surefire-version>3.2.5</surefire-version>
   </properties>
 
   <dependencyManagement>
@@ -173,6 +175,47 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+            <configuration>
+              <excludes>
+                <!--                <exclude>**/config/**</exclude>-->
+                <!--                <exclude>**/controller/**</exclude>-->
+                <exclude>**/dto/**</exclude>
+                <!--                <exclude>**/mapper/**</exclude>-->
+                <!--                <exclude>**/exception/**</exclude>-->
+                <!--                <exclude>**/repository/**</exclude>-->
+                <!--                <exclude>**/service/**</exclude>-->
+              </excludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire-version}</version>
+        <configuration>
+          <useModulePath>false</useModulePath>
+          <includes>
+            <include>**/*Tests.java</include>
+          </includes>
         </configuration>
       </plugin>
     </plugins>
