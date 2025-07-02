@@ -1,4 +1,4 @@
-package com.pm.utility;
+package com.pm.patientservice.utility;
 
 import static org.instancio.Select.field;
 

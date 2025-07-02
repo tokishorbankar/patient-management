@@ -2,7 +2,7 @@ package com.pm.patientservice.controller;
 
 import static com.pm.patientservice.service.PatientService.ERROR_MESSAGE_NOT_FOUND_BY_EMAIL_ID;
 import static com.pm.patientservice.service.PatientService.ERROR_MESSAGE_NOT_FOUND_BY_ID;
-import static com.pm.utility.PatientUtil.buildRandomPatientDTO;
+import static com.pm.patientservice.utility.PatientUtil.buildRandomPatientDTO;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItems;
@@ -10,7 +10,7 @@ import static org.hamcrest.Matchers.not;
 
 import com.pm.patientservice.configuration.TestContainersConfiguration;
 import com.pm.patientservice.model.dto.PatientDTO;
-import com.pm.utility.PatientUtil;
+import com.pm.patientservice.utility.PatientUtil;
 import io.restassured.RestAssured;
 import java.util.List;
 import java.util.UUID;

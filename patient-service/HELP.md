@@ -2,12 +2,19 @@
 
 * To start the database container and patient-service, run the following command in your terminal:
 ```shell
-docker-compose -f docker/docker-compose.yml up -d
+cd docker
+docker-compose up -d &
 ```
 
 * To stop the database container and patient-service, run the following command in your terminal:
 ```shell
-docker-compose -f docker/docker-compose.yml down
+cd docker
+docker-compose down
+```
+
+* Build Patient Service JAR file:
+```shell
+mvn clean install
 ```
 
 * Build the Docker image with the following command:

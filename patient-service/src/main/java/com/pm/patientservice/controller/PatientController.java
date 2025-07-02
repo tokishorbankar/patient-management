@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/patients")
 class PatientController {
 
-  private PatientService patientService;
+  private final PatientService patientService;
 
   public PatientController(final PatientService patientService) {
     this.patientService = patientService;
@@ -73,8 +73,7 @@ class PatientController {
    * @return ResponseEntity with APIResponse containing the created patient
    */
   @PostMapping
-  public ResponseEntity<APIResponse<PatientDTO>> createPatient(@Validated({
-      Default.class,
+  public ResponseEntity<APIResponse<PatientDTO>> createPatient(@Validated({Default.class,
       CreatePatientValidationGroup.class}) @RequestBody final PatientDTO patientDTO) {
 
     PatientDTO createdPatient = patientService.createPatient(patientDTO);
@@ -89,8 +88,7 @@ class PatientController {
    * @return ResponseEntity with APIResponse containing the updated patient
    */
   @PutMapping("/{id}")
-  public ResponseEntity<APIResponse<PatientDTO>> updatePatient(
-      @PathVariable("id") final UUID id,
+  public ResponseEntity<APIResponse<PatientDTO>> updatePatient(@PathVariable("id") final UUID id,
       @Validated({Default.class,
           CreatePatientValidationGroup.class}) @RequestBody final PatientDTO patientDTO) {
 
