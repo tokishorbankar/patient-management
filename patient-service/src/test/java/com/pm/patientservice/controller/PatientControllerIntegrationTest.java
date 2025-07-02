@@ -2,14 +2,15 @@ package com.pm.patientservice.controller;
 
 import static com.pm.patientservice.service.PatientService.ERROR_MESSAGE_NOT_FOUND_BY_EMAIL_ID;
 import static com.pm.patientservice.service.PatientService.ERROR_MESSAGE_NOT_FOUND_BY_ID;
+import static com.pm.utility.PatientUtil.buildRandomPatientDTO;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
-import static org.instancio.Select.field;
 
 import com.pm.patientservice.configuration.TestContainersConfiguration;
 import com.pm.patientservice.model.dto.PatientDTO;
+import com.pm.utility.PatientUtil;
 import io.restassured.RestAssured;
 import java.util.List;
 import java.util.UUID;
@@ -36,16 +37,6 @@ class PatientControllerIntegrationTest {
   void setUpBaseUrls() {
     String url = "http://localhost:%s/patients";
     RestAssured.baseURI = String.format(url, port);
-  }
-
-  // Helper method to create a PatientDTO with random data
-  private PatientDTO buildRandomPatientDTO() {
-    return Instancio.of(PatientDTO.class)
-        .ignore(field(PatientDTO::getId))
-        .set(field(PatientDTO::getRegisteredDate), "2023-12-01")
-        .set(field(PatientDTO::getDateOfBirth), "2020-12-01")
-        .generate(field(PatientDTO::getEmail), gen -> gen.net().email())
-        .create();
   }
 
   // Helper method to create and persist a patient, returning the id
@@ -87,7 +78,7 @@ class PatientControllerIntegrationTest {
   void should_Returns_AllPatients() {
     // crate list of patientDTOSList using buildRandomPatientDTO method use java stream
 
-    List<PatientDTO> patientDTOList = Stream.generate(this::buildRandomPatientDTO)
+    List<PatientDTO> patientDTOList = Stream.generate(PatientUtil::buildRandomPatientDTO)
         .limit(5)
         .toList();
 

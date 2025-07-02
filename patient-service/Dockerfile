@@ -4,7 +4,7 @@ FROM amazoncorretto:21-alpine
 WORKDIR /app
 
 # Copy the JAR file into the container
-COPY target/patient-service*.jar /app/patient-service.jar
+COPY ./target/patient-service*.jar patient-service.jar
 
 # Expose the port the application runs on
 EXPOSE 8080
