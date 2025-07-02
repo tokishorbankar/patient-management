@@ -28,7 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = TestContainersConfiguration.class)
 @Testcontainers
-class PatientControllerIntegrationTest {
+class PatientControllerIntegrationTests {
 
   @LocalServerPort
   int port;

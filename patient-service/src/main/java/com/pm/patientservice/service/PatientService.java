@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class PatientService {
 
   public static final String ERROR_MESSAGE_NOT_FOUND_BY_ID = "Patient not found with ID: %s";
@@ -45,7 +46,6 @@ public class PatientService {
    *
    * @return a list of PatientDTOs representing all patients
    */
-  @Transactional
   public List<PatientDTO> getAllPatients() {
     log.info("Retrieving all patients");
     return patientRepository.findAll().stream()
@@ -59,7 +59,6 @@ public class PatientService {
    * @param id the ID of the patient to retrieve
    * @return the PatientDTO representing the patient, or null if not found
    */
-  @Transactional
   public PatientDTO getPatientById(final UUID id) {
     log.info("Retrieving patient with ID: {}", id);
     return patientRepository.findById(id)
@@ -74,7 +73,6 @@ public class PatientService {
    * @param email the email of the patient to retrieve
    * @return the PatientDTO representing the patient, or null if not found
    */
-  @Transactional
   public PatientDTO getPatientByEmail(final String email) {
     log.info("Retrieving patient with email: {}", email);
     return patientRepository.findByEmail(email)
@@ -89,7 +87,6 @@ public class PatientService {
    * @param patientDTO the patient data transfer object containing patient details
    * @return the created patient as a data transfer object
    */
-  @Transactional
   public PatientDTO createPatient(final PatientDTO patientDTO) {
     log.info("Creating patient with email: {}", patientDTO.getEmail());
 
@@ -110,7 +107,6 @@ public class PatientService {
    * @param patientDTO the updated patient data transfer object
    * @return the updated patient as a data transfer object
    */
-  @Transactional
   public PatientDTO updatePatient(final UUID id, final PatientDTO patientDTO) {
     log.info("Updating patient with ID: {}", id);
 
@@ -134,7 +130,6 @@ public class PatientService {
    *
    * @param id the ID of the patient to delete
    */
-  @Transactional
   public void deletePatient(final UUID id) {
     log.info("Deleting patient with ID: {}", id);
     if (!patientRepository.existsById(id)) {
@@ -148,7 +143,6 @@ public class PatientService {
    *
    * @param email the email of the patient to delete
    */
-  @Transactional
   public void deletePatientByEmail(final String email) {
     log.info("Deleting patient with email: {}", email);
     Patient patient = patientRepository.findByEmail(email)
