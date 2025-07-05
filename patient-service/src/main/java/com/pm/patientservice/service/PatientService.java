@@ -17,13 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class PatientService {
 
+  private static final Logger log = LoggerFactory.getLogger(PatientService.class);
+  /**
+   * Error messages for various exceptions.
+   */
   public static final String ERROR_MESSAGE_NOT_FOUND_BY_ID = "Patient not found with ID: %s";
   public static final String ERROR_MESSAGE_NOT_FOUND_BY_EMAIL_ID = "Patient not found with email: "
       + "%s";
   public static final String ERROR_MESSAGE_ALREADY_EXISTS_BY_EMAIL_ID = "Patient already exists "
       + "with "
       + "the provided email address %s";
-  private static final Logger log = LoggerFactory.getLogger(PatientService.class);
 
   private final PatientMapper patientMapper;
 

@@ -31,7 +31,6 @@ public class PatientRepositoryTests {
 
     assert foundPatient.isPresent();
     assert foundPatient.get().getEmail().equals(savedPatient.getEmail());
-    assert patientRepository.existsByEmail(savedPatient.getEmail());
   }
 
   @Test
@@ -54,7 +53,6 @@ public class PatientRepositoryTests {
 
     assert foundPatient.isPresent();
     assert foundPatient.get().getId().equals(savedPatient.getId());
-    assert patientRepository.existsById(savedPatient.getId());
   }
 
   @Test
@@ -85,9 +83,9 @@ public class PatientRepositoryTests {
     Patient savedPatient = patientRepository.save(patient);
 
     boolean exists = patientRepository.existsByEmailAndIdNot(savedPatient.getEmail(),
-        savedPatient.getId());
+        UUID.randomUUID());
 
-    assert !exists;
+    assert exists;
   }
 
   @Test

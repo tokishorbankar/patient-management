@@ -115,22 +115,6 @@ public final class UtilityService {
   }
 
   /**
-   * Converts an object of type T to a JSON string and then back to an object of type T.
-   *
-   * @param object the object to convert
-   * @param <T>    the type of the object
-   * @return an instance of T with data from the original object
-   */
-  public static <T> T convertObjectToObject(T object) {
-    try {
-      String jsonString = convertObjectToJsonString(object);
-      return convertJsonStringToObject(jsonString, (Class<T>) object.getClass());
-    } catch (RuntimeException e) {
-      throw new RuntimeException("Error converting object to object", e);
-    }
-  }
-
-  /**
    * Asserts that two objects of type T are deeply equal by comparing their JSON string
    * representations.
    *

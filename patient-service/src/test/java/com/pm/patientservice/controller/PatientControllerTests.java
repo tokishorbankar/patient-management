@@ -30,11 +30,16 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(PatientController.class)
 class PatientControllerTests {
 
-  @Autowired
+
   private MockMvc mockMvc;
 
   @MockitoBean
   private PatientService patientService;
+
+  @Autowired
+  PatientControllerTests(MockMvc mockMvc) {
+    this.mockMvc = mockMvc;
+  }
 
 
   @Test
@@ -72,16 +77,17 @@ class PatientControllerTests {
   @DisplayName("should return patient by id")
   void shouldReturnPatientById() throws Exception {
     UUID id = UUID.randomUUID();
-    PatientDTO patientDTO = UtilityService.buildRandomPatientDTO();
-    patientDTO.setId(id);
+    PatientDTO expectedDTO = UtilityService.buildRandomPatientDTO();
+    expectedDTO.setId(id);
 
-    when(patientService.getPatientById(id)).thenReturn(patientDTO);
+    when(patientService.getPatientById(id)).thenReturn(expectedDTO);
 
     mockMvc.perform(get("/patients/{id}", id))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.id").value(id.toString()))
         .andExpect(jsonPath("$.success").value(true))
-        .andExpect(jsonPath("$.message").value("Operation successful"));
+        .andExpect(jsonPath("$.message").value("Operation successful"))
+        .andExpect(jsonPath("$.data.email").value(expectedDTO.getEmail()));
   }
 
   @Test
