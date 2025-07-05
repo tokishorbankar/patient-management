@@ -1,7 +1,7 @@
 package com.pm.patientservice.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.pm.patientservice.model.dto.validators.CreatePatientValidationGroup;
+import com.pm.patientservice.model.validators.CreatePatientValidationGroup;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -42,6 +42,7 @@ public class PatientDTO {
   private LocalDate registeredDate;
 
   public PatientDTO() {
+    super();
   }
 
 }

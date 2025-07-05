@@ -2,7 +2,7 @@ package com.pm.patientservice.controller;
 
 import com.pm.patientservice.model.dto.APIResponse;
 import com.pm.patientservice.model.dto.PatientDTO;
-import com.pm.patientservice.model.dto.validators.CreatePatientValidationGroup;
+import com.pm.patientservice.model.validators.CreatePatientValidationGroup;
 import com.pm.patientservice.service.PatientService;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.groups.Default;

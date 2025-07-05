@@ -51,6 +51,7 @@ public class Patient {
   private LocalDate registeredDate;
 
   public Patient() {
+    super();
   }
 
 }

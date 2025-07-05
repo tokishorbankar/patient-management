@@ -9,11 +9,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, UUID> {
 
-    Optional<Patient> findByEmail(String email);
+    Optional<Patient> findByEmail(final String email);
 
-    Optional<Patient> findById(UUID id);
+    Optional<Patient> findById(final UUID id);
 
-    boolean existsByEmail(String email);
+    boolean existsByEmail(final String email);
 
-    boolean existsByEmailAndIdNot(String email, UUID id);
+    boolean existsByEmailAndIdNot(final String email, final UUID id);
 }
