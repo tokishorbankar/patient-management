@@ -198,6 +198,7 @@
         <configuration>
           <excludes>
             <exclude>com/pm/patientservice/model/**</exclude>
+            <exclude>**/PatientServiceApplication*</exclude>
           </excludes>
         </configuration>
       </plugin>

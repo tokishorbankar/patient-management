@@ -1,5 +1,7 @@
 package com.pm.patientservice.service;
 
+import static com.pm.patientservice.utility.UtilityService.assertDeepObjectEquals;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,7 +16,7 @@ import com.pm.patientservice.model.dto.PatientDTO;
 import com.pm.patientservice.model.entities.Patient;
 import com.pm.patientservice.model.mapper.PatientMapper;
 import com.pm.patientservice.repository.PatientRepository;
-import com.pm.patientservice.utility.PatientUtil;
+import com.pm.patientservice.utility.UtilityService;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,8 +24,10 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,11 +36,19 @@ class PatientServiceTests {
   @Mock
   private PatientRepository patientRepository;
 
-  @Mock
-  private PatientMapper patientMapper;
+  @Spy
+  private PatientMapper patientMapper = Mappers.getMapper(PatientMapper.class);
 
   @InjectMocks
   private PatientService patientService;
+
+//  @BeforeEach
+//  void setUp() throws NoSuchFieldException, IllegalAccessException {
+//    LocalDateMapper localDateMapper = Mockito.spy(new LocalDateMapper());
+//    var field = PatientMapperImpl.class.getDeclaredField("localDateMapper");
+//    field.setAccessible(true);
+//    field.set(patientMapper, localDateMapper);
+//  }
 
 
   @Test
@@ -46,6 +58,7 @@ class PatientServiceTests {
 
     List<PatientDTO> patients = patientService.getAllPatients();
 
+    assertNotNull(patients);
     assertEquals(0, patients.size());
     verify(patientMapper, times(0)).toDto(any(Patient.class));
     verify(patientRepository, times(1)).findAll();
@@ -54,14 +67,17 @@ class PatientServiceTests {
   @Test
   @DisplayName("should retrieve all patients when repository returns non-empty list")
   void shouldRetrieveAllPatientsWhenRepositoryReturnsNonEmptyList() {
-    List<Patient> existingEntities = Stream.generate(PatientUtil::buildRandomPatient)
+    List<Patient> existingEntities = Stream.generate(UtilityService::buildRandomPatient)
         .limit(5).toList();
 
     when(patientRepository.findAll()).thenReturn(existingEntities);
 
     List<PatientDTO> patients = patientService.getAllPatients();
 
+    assertNotNull(patients);
     assertEquals(existingEntities.size(), patients.size());
+    assertDeepObjectEquals(existingEntities, patients);
+
     verify(patientMapper,
         times(existingEntities.size())).toDto(any(Patient.class));
     verify(patientRepository, times(1)).findAll();
@@ -72,17 +88,19 @@ class PatientServiceTests {
   @DisplayName("should retrieve patient by ID when exists")
   void shouldRetrievePatientByIdWhenExists() {
     UUID patientId = UUID.randomUUID();
-    Patient existingPatient = PatientUtil.buildRandomPatient();
+    Patient existingPatient = UtilityService.buildRandomPatient();
     existingPatient.setId(patientId);
-    PatientDTO expectedPatientDTO = PatientUtil.buildRandomPatientDTO();
+
+    PatientDTO expectedPatientDTO = UtilityService.convertObjectToObject(existingPatient,
+        PatientDTO.class);
 
     when(patientRepository.findById(patientId)).thenReturn(Optional.of(existingPatient));
-    when(patientMapper.toDto(existingPatient)).thenReturn(expectedPatientDTO);
 
     PatientDTO actualPatientDTO = patientService.getPatientById(patientId);
 
-    assertEquals(expectedPatientDTO, actualPatientDTO);
     assertNotNull(actualPatientDTO);
+//    assertEquals(expectedPatientDTO, actualPatientDTO);
+    assertDeepObjectEquals(expectedPatientDTO, actualPatientDTO);
     verify(patientRepository, times(1)).findById(patientId);
     verify(patientMapper, times(1)).toDto(existingPatient);
   }
@@ -109,6 +127,42 @@ class PatientServiceTests {
         () -> patientService.getPatientByEmail(nonExistentEmail));
 
     verify(patientRepository, times(1)).findByEmail(nonExistentEmail);
+  }
+
+  @Test
+  @DisplayName("should create patient when email does not exist")
+  void shouldCreatePatientWhenEmailDoesNotExist() {
+
+    UUID patientId = UUID.randomUUID();
+
+    PatientDTO patientDTO = UtilityService.buildRandomPatientDTO();
+    patientDTO.setId(patientId);
+
+    Patient patientEntity = UtilityService.convertObjectToObject(patientDTO, Patient.class);
+    patientEntity.setId(patientId);
+
+    when(patientRepository.existsByEmail(patientDTO.getEmail())).thenReturn(false);
+    when(patientMapper.toEntity(patientDTO)).thenReturn(patientEntity);
+
+    when(patientRepository.save(any(Patient.class))).thenReturn(patientEntity);
+    when(patientMapper.toDto(patientEntity)).thenReturn(patientDTO);
+
+    PatientDTO createdPatient = patientService.createPatient(patientDTO);
+
+    assertAll(
+        () -> assertNotNull(createdPatient),
+        () -> assertEquals(patientId, createdPatient.getId()),
+        () -> assertEquals(patientDTO.getEmail(), createdPatient.getEmail()),
+        () -> assertEquals(patientDTO.getRegisteredDate(), createdPatient.getRegisteredDate()),
+        () -> assertEquals(patientDTO.getDateOfBirth(), createdPatient.getDateOfBirth()),
+        () -> assertEquals(patientDTO.getName(), createdPatient.getName())
+    );
+
+    verify(patientRepository, times(1)).existsByEmail(patientDTO.getEmail());
+    verify(patientMapper, times(1)).toEntity(patientDTO);
+    verify(patientRepository, times(1)).save(any(Patient.class));
+    verify(patientMapper, times(1)).toDto(any(Patient.class));
+
   }
 
   @Test

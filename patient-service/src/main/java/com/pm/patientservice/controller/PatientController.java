@@ -22,9 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/patients")
-class PatientController {
+public class PatientController {
 
   private final PatientService patientService;
+
+  /**
+   * Constructor for PatientController.
+   *
+   * @param patientService the service to handle patient-related operations
+   */
 
   public PatientController(final PatientService patientService) {
     this.patientService = patientService;
