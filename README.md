@@ -1,4 +1,4 @@
-# patient-management
+# Patient Management
 
 ## Patent Service
 
