@@ -41,3 +41,8 @@ mvn spring-boot:run
 ```curl
 http://localhost:8080/swagger-ui/index.html
 ```
+
+* To access the Jacoco report, navigate to:
+```curl
+http://<IP>:<PROR>/patient-service/target/site/jacoco/index.html
+```
