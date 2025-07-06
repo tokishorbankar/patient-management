@@ -36,7 +36,6 @@
     <mapstruct.version>1.5.3.Final</mapstruct.version>
     <mapstruct-bindings.version>0.2.0</mapstruct-bindings.version>
     <jacoco-version>0.8.13</jacoco-version>
-    <surefire-version>3.2.5</surefire-version>
     <org.springdoc-ui.version>2.7.0</org.springdoc-ui.version>
   </properties>
 
