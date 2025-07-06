@@ -1,4 +1,4 @@
-# USAGES
+# Patient Service USAGES
 
 * To start the database container and patient-service, run the following command in your terminal:
 ```shell
