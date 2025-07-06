@@ -37,6 +37,7 @@
     <mapstruct-bindings.version>0.2.0</mapstruct-bindings.version>
     <jacoco-version>0.8.13</jacoco-version>
     <surefire-version>3.2.5</surefire-version>
+    <org.springdoc-ui.version>2.7.0</org.springdoc-ui.version>
   </properties>
 
   <dependencyManagement>
@@ -96,6 +97,13 @@
       <artifactId>mapstruct</artifactId>
       <version>${mapstruct.version}</version>
       <optional>true</optional>
+    </dependency>
+
+    <!-- Swagger Dependencies -->
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>${org.springdoc-ui.version}</version>
     </dependency>
 
     <!-- Testing Dependencies -->
@@ -198,8 +206,9 @@
         <configuration>
           <excludes>
             <exclude>**/PatientServiceApplication*</exclude>
-            <exclude>com/pm/patientservice/model/**</exclude>
+            <exclude>com/pm/patientservice/configuration/**</exclude>
             <exclude>com/pm/patientservice/exception/**</exclude>
+            <exclude>com/pm/patientservice/model/**</exclude>
           </excludes>
         </configuration>
       </plugin>
