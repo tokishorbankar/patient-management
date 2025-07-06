@@ -42,3 +42,4 @@ docker run --name patient-service -d -p 8080:8080 patient-service:latest
 ```shell
 cd patient-service
 mvn clean package
+```
