@@ -10,4 +10,4 @@ COPY ./target/patient-service*.jar patient-service.jar
 EXPOSE 8080
 
 # Set the command to run the application
-CMD ["java", "-jar", "patient-service.jar"]
+CMD ["java", "-jar", "patient-service.jar", "-Dspring.profiles.active=docker"]
