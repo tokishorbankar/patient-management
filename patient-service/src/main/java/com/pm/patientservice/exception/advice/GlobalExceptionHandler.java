@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<APIResponse<Map<String, String>>> handleMethodArgumentNotValidException(
       final MethodArgumentNotValidException ex) {
-    log.warn("Validation error: {}", ex.getMessage());
+    log.error("Validation error: {}", ex.getMessage());
 
     Map<String, String> errors = (ex
         .getBindingResult()
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(EmailAlreadyExistsException.class)
   public ResponseEntity<APIResponse<String>> handleEmailAlreadyExistsException(
       final EmailAlreadyExistsException ex) {
-    log.warn("Email already exists: {}", ex.getMessage());
+    log.error("Email already exists: {}", ex.getMessage());
 
     APIResponse<String> response = new APIResponse<>(null, ex.getMessage(),
         APIResponse.DEFAULT_ERROR_STATUS);
@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(PatientNotFoundException.class)
   public ResponseEntity<APIResponse<String>> handlePatientNotFoundException(
       final PatientNotFoundException ex) {
-    log.warn("Patient not found: {}", ex.getMessage());
+    log.error("Patient not found: {}", ex.getMessage());
 
     APIResponse<String> response = new APIResponse<>(null, ex.getMessage(),
         APIResponse.DEFAULT_ERROR_STATUS);
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(NoResourceFoundException.class)
   public ResponseEntity<APIResponse<String>> handleNoResourceFoundException(
       final NoResourceFoundException ex) {
-    log.warn("Resource not found: {}", ex.getMessage());
+    log.error("Resource not found: {}", ex.getMessage());
 
     APIResponse<String> response = new APIResponse<>(null, ex.getMessage(),
         APIResponse.DEFAULT_ERROR_STATUS);
@@ -78,7 +78,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<APIResponse<String>> handleMethodArgumentTypeMismatchException(
       final MethodArgumentTypeMismatchException ex) {
-    log.warn("Method argument type mismatch: {}", ex.getMessage());
+    log.error("Method argument type mismatch: {}", ex.getMessage());
 
     APIResponse<String> response = new APIResponse<>(null,
         "Invalid argument type: " + ex.getMessage(),
@@ -90,7 +90,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
   public ResponseEntity<APIResponse<String>> handleHttpRequestMethodNotSupportedException(
       final HttpRequestMethodNotSupportedException ex) {
-    log.warn("HTTP method not supported: {}", ex.getMessage());
+    log.error("HTTP method not supported: {}", ex.getMessage());
 
     APIResponse<String> response = new APIResponse<>(null,
         "HTTP method not supported: " + ex.getMessage(),
@@ -102,7 +102,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<APIResponse<String>> handleIllegalArgumentException(
       final IllegalArgumentException ex) {
-    log.warn("Illegal argument: {}", ex.getMessage());
+    log.error("Illegal argument: {}", ex.getMessage());
 
     APIResponse<String> response = new APIResponse<>(null,
         "Invalid argument: " + ex.getMessage(),

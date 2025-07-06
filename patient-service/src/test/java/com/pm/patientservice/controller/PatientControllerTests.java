@@ -27,14 +27,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(PatientController.class)
+@WebMvcTest(controllers = PatientController.class)
 class PatientControllerTests {
-
 
   private MockMvc mockMvc;
 
   @MockitoBean
   private PatientService patientService;
+
 
   @Autowired
   PatientControllerTests(MockMvc mockMvc) {

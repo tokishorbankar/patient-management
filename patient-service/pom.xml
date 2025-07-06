@@ -197,8 +197,9 @@
         </executions>
         <configuration>
           <excludes>
-            <exclude>com/pm/patientservice/model/**</exclude>
             <exclude>**/PatientServiceApplication*</exclude>
+            <exclude>com/pm/patientservice/model/**</exclude>
+            <exclude>com/pm/patientservice/exception/**</exclude>
           </excludes>
         </configuration>
       </plugin>
