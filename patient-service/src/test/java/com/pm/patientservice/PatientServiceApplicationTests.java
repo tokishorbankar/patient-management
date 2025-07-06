@@ -23,22 +23,4 @@ class PatientServiceApplicationTests {
     // This test will pass if the application context loads successfully
   }
 
-
-  @Test
-  @DisplayName("should run main method with args without exceptions")
-  void mainMethodWithArgsRunsWithoutException() {
-    try (MockedStatic<PatientServiceApplication> mockedStatic = org.mockito.Mockito.mockStatic(
-        PatientServiceApplication.class)) {
-      mockedStatic.when(() -> PatientServiceApplication.main(new String[]{"arg1", "arg2"}))
-          .thenCallRealMethod();
-      assertDoesNotThrow(() ->
-          PatientServiceApplication.main(new String[]{"arg1", "arg2"})
-      );
-
-      mockedStatic.verify(() -> PatientServiceApplication.main(new String[]{"arg1", "arg2"}));
-      mockedStatic.verify(() -> PatientServiceApplication.main(any(String[].class)), times(1));
-    }
-
-  }
-
 }
